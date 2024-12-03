@@ -1,8 +1,15 @@
 use std::io::{self, stdin, BufReader, Read};
 
+// #[derive(Debug)]
 enum State {
     Initial,
     Mul {
+        letters: u32,
+    },
+    Do {
+        letters: u32,
+    },
+    Dont {
         letters: u32,
     },
     FirstNumber {
@@ -21,6 +28,8 @@ fn main() -> io::Result<()> {
 
     let mut valid_part = State::Initial;
     let mut sum = 0;
+    let mut sum_enabled = 0;
+    let mut enabled = true;
 
     for input in reader.bytes() {
         let Ok(input) = input else {
@@ -42,6 +51,40 @@ fn main() -> io::Result<()> {
                 } else {
                     State::Initial
                 }
+            }
+            State::Do { letters } => {
+                valid_part = if input == b"do()"[letters as usize] {
+                    if letters == 3 {
+                        enabled = true;
+                        State::Initial
+                    } else {
+                        State::Do {
+                            letters: letters + 1,
+                        }
+                    }
+                } else if letters == 2 && input == b'n' {
+                    State::Dont {
+                        letters: letters + 1,
+                    }
+                } else {
+                    State::Initial
+                };
+                // dbg!((&valid_part, letters, input));
+            }
+            State::Dont { letters } => {
+                valid_part = if input == b"don't()"[letters as usize] {
+                    if letters == 6 {
+                        enabled = false;
+                        State::Initial
+                    } else {
+                        State::Dont {
+                            letters: letters + 1,
+                        }
+                    }
+                } else {
+                    State::Initial
+                };
+                // dbg!((&valid_part, letters, input));
             }
             State::FirstNumber { digits, value } => {
                 valid_part = if input.is_ascii_digit() && digits < 3 {
@@ -72,6 +115,9 @@ fn main() -> io::Result<()> {
                     }
                 } else if input == b')' && digits > 0 {
                     sum += first_value * value;
+                    if enabled {
+                        sum_enabled += first_value * value;
+                    }
                     State::Initial
                 } else {
                     State::Initial
@@ -80,10 +126,12 @@ fn main() -> io::Result<()> {
             State::Initial => { /* handle later */ }
         }
         // as this might result from a reset we try it again after the previous handling
-        if matches!(valid_part, State::Initial) && input == b'm' {
-            valid_part = State::Mul { letters: 1 };
+        match (&valid_part, input) {
+            (State::Initial, b'm') => valid_part = State::Mul { letters: 1 },
+            (State::Initial, b'd') => valid_part = State::Do { letters: 1 },
+            (_, _) => (),
         }
     }
-    println!("{sum}");
+    println!("{sum} {sum_enabled}");
     Ok(())
 }
