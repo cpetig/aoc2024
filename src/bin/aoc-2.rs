@@ -25,23 +25,21 @@ fn main() -> io::Result<()> {
     let mut ok_lines = 0;
     let mut ok_dampened = 0;
 
-    for l in reader.lines() {
-        if let Ok(str) = l {
-            let numbers: Vec<usize> = str
-                .split_whitespace()
-                .filter_map(|n| n.parse::<usize>().ok())
-                .collect();
-            if valid(&numbers) {
-                ok_lines += 1;
-                ok_dampened += 1;
-            } else {
-                for i in 0..numbers.len() {
-                    let mut without_n = numbers.clone();
-                    without_n.remove(i);
-                    if valid(&without_n) {
-                        ok_dampened += 1;
-                        break;
-                    }
+    for str in reader.lines().map_while(Result::ok) {
+        let numbers: Vec<usize> = str
+            .split_whitespace()
+            .filter_map(|n| n.parse::<usize>().ok())
+            .collect();
+        if valid(&numbers) {
+            ok_lines += 1;
+            ok_dampened += 1;
+        } else {
+            for i in 0..numbers.len() {
+                let mut without_n = numbers.clone();
+                without_n.remove(i);
+                if valid(&without_n) {
+                    ok_dampened += 1;
+                    break;
                 }
             }
         }
