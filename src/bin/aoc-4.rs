@@ -27,7 +27,7 @@ fn main() -> io::Result<()> {
     let mut board: Vec<String> = Vec::new();
 
     for input in reader.lines().map_while(Result::ok) {
-        if input.len() > 1 {
+        if input.len() > 3 {
             board.push(input);
         }
     }
@@ -35,45 +35,25 @@ fn main() -> io::Result<()> {
     let mut count = 0;
     for y in 0..=board.len() - 4 {
         for x in 0..=board[0].len() - 4 {
-            if test(&board, PATTERN, x, y, 1, 0) {
+            if test(&board, PATTERN, x, y, 1, 0) || test(&board, PATTERN, x + 3, y, -1, 0) {
                 // dbg!((x, y));
                 count += 1;
             }
-            if test(&board, PATTERN, x, y, 0, 1) {
+            if test(&board, PATTERN, x, y, 0, 1) || test(&board, PATTERN, x, y + 3, 0, -1) {
                 // dbg!((x, y));
                 count += 1;
             }
-            if test(&board, PATTERN, x, y, 1, 1) {
+            if test(&board, PATTERN, x, y, 1, 1) || test(&board, PATTERN, x + 3, y + 3, -1, -1) {
                 // dbg!((x, y));
                 count += 1;
             }
-            if test(&board, PATTERN, x + 3, y, -1, 1) {
-                // dbg!((x, y));
-                count += 1;
-            }
-            if test(&board, PATTERN, x + 3, y, -1, 0) {
-                // dbg!((x, y));
-                count += 1;
-            }
-            if test(&board, PATTERN, x, y + 3, 0, -1) {
-                // dbg!((x, y));
-                count += 1;
-            }
-            if test(&board, PATTERN, x + 3, y + 3, -1, -1) {
-                // dbg!((x, y));
-                count += 1;
-            }
-            if test(&board, PATTERN, x, y + 3, 1, -1) {
+            if test(&board, PATTERN, x + 3, y, -1, 1) || test(&board, PATTERN, x, y + 3, 1, -1) {
                 // dbg!((x, y));
                 count += 1;
             }
         }
         for x in board[0].len() - 3..=board[0].len() - 1 {
-            if test(&board, PATTERN, x, y, 0, 1) {
-                // dbg!((x, y));
-                count += 1;
-            }
-            if test(&board, PATTERN, x, y + 3, 0, -1) {
+            if test(&board, PATTERN, x, y, 0, 1) || test(&board, PATTERN, x, y + 3, 0, -1) {
                 // dbg!((x, y));
                 count += 1;
             }
@@ -81,11 +61,7 @@ fn main() -> io::Result<()> {
     }
     for y in board.len() - 3..=board.len() - 1 {
         for x in 0..=board[0].len() - 4 {
-            if test(&board, PATTERN, x, y, 1, 0) {
-                // dbg!((x, y));
-                count += 1;
-            }
-            if test(&board, PATTERN, x + 3, y, -1, 0) {
+            if test(&board, PATTERN, x, y, 1, 0) || test(&board, PATTERN, x + 3, y, -1, 0) {
                 // dbg!((x, y));
                 count += 1;
             }
