@@ -1,6 +1,7 @@
 use std::io::{self, stdin, BufRead, BufReader};
 
 const PATTERN: &[u8] = b"XMAS";
+const PATTERN_X: &[u8] = b"MAS";
 
 fn test(
     board: &[String],
@@ -24,7 +25,6 @@ fn main() -> io::Result<()> {
     let reader = BufReader::new(stdin());
 
     let mut board: Vec<String> = Vec::new();
-    let mut count = 0;
 
     for input in reader.lines().map_while(Result::ok) {
         if input.len() > 1 {
@@ -32,6 +32,7 @@ fn main() -> io::Result<()> {
         }
     }
     // dbg!(&board);
+    let mut count = 0;
     for y in 0..=board.len() - 4 {
         for x in 0..=board[0].len() - 4 {
             if test(&board, PATTERN, x, y, 1, 0) {
@@ -84,12 +85,27 @@ fn main() -> io::Result<()> {
                 // dbg!((x, y));
                 count += 1;
             }
-            if test(&board, PATTERN, x+3, y, -1, 0) {
+            if test(&board, PATTERN, x + 3, y, -1, 0) {
                 // dbg!((x, y));
                 count += 1;
             }
         }
     }
     println!("{count}");
+
+    let mut count_x = 0;
+    for y in 0..=board.len() - 3 {
+        for x in 0..=board[0].len() - 3 {
+            if (test(&board, PATTERN_X, x, y, 1, 1)
+                || test(&board, PATTERN_X, x + 2, y + 2, -1, -1))
+                && (test(&board, PATTERN_X, x + 2, y, -1, 1)
+                    || test(&board, PATTERN_X, x, y + 2, 1, -1))
+            {
+                // dbg!((x, y));
+                count_x += 1;
+            }
+        }
+    }
+    println!("{count_x}");
     Ok(())
 }
