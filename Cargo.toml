@@ -10,3 +10,12 @@ name = "aoc-2"
 
 [[bin]]
 name = "aoc-3"
+
+[[bin]]
+name = "aoc-4"
+
+[[bin]]
+name = "aoc-5"
+
+[[bin]]
+name = "aoc-6"
