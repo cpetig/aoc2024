@@ -54,6 +54,36 @@ fn main() -> io::Result<()> {
             }
         }
     }
-    println!("{count}");
+    let mut count2: usize = 0;
+    for (_ch, a) in antennas.iter() {
+        for pos1 in a.iter() {
+            for pos2 in a.iter() {
+                if pos1 != pos2 {
+                    let pos1 = (pos1.0 as isize, pos1.1 as isize);
+                    let pos2 = (pos2.0 as isize, pos2.1 as isize);
+                    for n in 0..isize::MAX {
+                        let candidate = (
+                            pos1.0 + n * (pos2.0 - pos1.0),
+                            pos1.1 + n * (pos2.1 - pos1.1),
+                        );
+                        if candidate.0 >= 0
+                            && candidate.0 < max_x
+                            && candidate.1 >= 0
+                            && candidate.1 < max_y
+                        {
+                            let candidate = (candidate.0 as usize, candidate.1 as usize);
+                            if board[candidate.1][candidate.0] != b'#' {
+                                board[candidate.1][candidate.0] = b'#';
+                                count2 += 1;
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    println!("{count} {}", count + count2);
     Ok(())
 }
