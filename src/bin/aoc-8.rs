@@ -28,7 +28,7 @@ fn main() -> io::Result<()> {
             board.push(Vec::from(line));
         }
     }
-    dbg!(&antennas);
+    // dbg!(&antennas);
     let max_x = board[0].len() as isize;
     let max_y = board.len() as isize;
     for (_ch, a) in antennas.iter() {
