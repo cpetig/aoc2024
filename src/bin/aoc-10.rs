@@ -1,46 +1,40 @@
-use std::io::{self, stdin, BufRead, BufReader};
+use std::{
+    collections::HashSet,
+    io::{self, stdin, BufRead, BufReader},
+};
 
-fn peaks_from(map: &[String], x: usize, y: usize, next: u8) -> usize {
-    dbg!((x,y,next));
+fn peaks_from(map: &[String], x: usize, y: usize, next: u8, peaks: &mut HashSet<(usize, usize)>) {
+    // dbg!((x, y, next));
     let max_x = map[0].len();
     let max_y = map.len();
-    let mut sum = if x > 0 && map[y].as_bytes()[x - 1] == next {
+    if x > 0 && map[y].as_bytes()[x - 1] == next {
         if next == b'9' {
-            1usize
+            peaks.insert((x - 1, y));
         } else {
-            peaks_from(map, x - 1, y, next + 1)
+            peaks_from(map, x - 1, y, next + 1, peaks);
         }
-    } else {
-        0usize
-    };
-    sum += if y > 0 && map[y - 1].as_bytes()[x] == next {
+    }
+    if y > 0 && map[y - 1].as_bytes()[x] == next {
         if next == b'9' {
-            1usize
+            peaks.insert((x, y-1));
         } else {
-            peaks_from(map, x, y - 1, next + 1)
+            peaks_from(map, x, y - 1, next + 1, peaks);
         }
-    } else {
-        0usize
-    };
-    sum += if y + 1 < max_y && map[y + 1].as_bytes()[x] == next {
+    }
+    if y + 1 < max_y && map[y + 1].as_bytes()[x] == next {
         if next == b'9' {
-            1usize
+            peaks.insert((x, y+1));
         } else {
-            peaks_from(map, x, y + 1, next + 1)
+            peaks_from(map, x, y + 1, next + 1, peaks);
         }
-    } else {
-        0usize
-    };
-    sum += if x + 1 < max_x && map[y].as_bytes()[x + 1] == next {
+    }
+    if x + 1 < max_x && map[y].as_bytes()[x + 1] == next {
         if next == b'9' {
-            1usize
+            peaks.insert((x + 1, y));
         } else {
-            peaks_from(map, x + 1, y, next + 1)
+            peaks_from(map, x + 1, y, next + 1, peaks);
         }
-    } else {
-        0usize
-    };
-    sum
+    }
 }
 
 fn main() -> io::Result<()> {
@@ -57,7 +51,9 @@ fn main() -> io::Result<()> {
     for y in 0..max_y {
         for x in 0..max_x {
             if map[y].as_bytes()[x] == b'0' {
-                sum += peaks_from(&map, x, y, b'1');
+                let mut peaks = HashSet::new();
+                peaks_from(&map, x, y, b'1', &mut peaks);
+                sum += peaks.len();
             }
         }
     }
