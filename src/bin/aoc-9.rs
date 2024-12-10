@@ -1,7 +1,4 @@
-use std::{
-    io::{self, stdin, BufReader, Read},
-    iter,
-};
+use std::io::{self, stdin, BufReader, Read};
 
 fn sum_over(mut low: usize, high: usize) -> usize {
     if low == 0 {
