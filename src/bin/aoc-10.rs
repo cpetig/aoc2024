@@ -59,14 +59,14 @@ fn peaks_from(map: &[String], x: usize, y: usize, next: u8, peaks: &mut HashSet<
     }
     if y > 0 && map[y - 1].as_bytes()[x] == next {
         if next == b'9' {
-            peaks.insert((x, y-1));
+            peaks.insert((x, y - 1));
         } else {
             peaks_from(map, x, y - 1, next + 1, peaks);
         }
     }
     if y + 1 < max_y && map[y + 1].as_bytes()[x] == next {
         if next == b'9' {
-            peaks.insert((x, y+1));
+            peaks.insert((x, y + 1));
         } else {
             peaks_from(map, x, y + 1, next + 1, peaks);
         }
@@ -98,7 +98,7 @@ fn main() -> io::Result<()> {
                 let mut peaks = HashSet::new();
                 peaks_from(&map, x, y, b'1', &mut peaks);
                 sum += peaks.len();
-                rating_sum += rating(&map, x,y, b'1');
+                rating_sum += rating(&map, x, y, b'1');
             }
         }
     }
