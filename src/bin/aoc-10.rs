@@ -3,6 +3,49 @@ use std::{
     io::{self, stdin, BufRead, BufReader},
 };
 
+fn rating(map: &[String], x: usize, y: usize, next: u8) -> usize {
+    // dbg!((x,y,next));
+    let max_x = map[0].len();
+    let max_y = map.len();
+    let mut sum = if x > 0 && map[y].as_bytes()[x - 1] == next {
+        if next == b'9' {
+            1usize
+        } else {
+            rating(map, x - 1, y, next + 1)
+        }
+    } else {
+        0usize
+    };
+    sum += if y > 0 && map[y - 1].as_bytes()[x] == next {
+        if next == b'9' {
+            1usize
+        } else {
+            rating(map, x, y - 1, next + 1)
+        }
+    } else {
+        0usize
+    };
+    sum += if y + 1 < max_y && map[y + 1].as_bytes()[x] == next {
+        if next == b'9' {
+            1usize
+        } else {
+            rating(map, x, y + 1, next + 1)
+        }
+    } else {
+        0usize
+    };
+    sum += if x + 1 < max_x && map[y].as_bytes()[x + 1] == next {
+        if next == b'9' {
+            1usize
+        } else {
+            rating(map, x + 1, y, next + 1)
+        }
+    } else {
+        0usize
+    };
+    sum
+}
+
 fn peaks_from(map: &[String], x: usize, y: usize, next: u8, peaks: &mut HashSet<(usize, usize)>) {
     // dbg!((x, y, next));
     let max_x = map[0].len();
@@ -48,15 +91,17 @@ fn main() -> io::Result<()> {
     let max_x = map[0].len();
     let max_y = map.len();
     let mut sum = 0;
+    let mut rating_sum = 0;
     for y in 0..max_y {
         for x in 0..max_x {
             if map[y].as_bytes()[x] == b'0' {
                 let mut peaks = HashSet::new();
                 peaks_from(&map, x, y, b'1', &mut peaks);
                 sum += peaks.len();
+                rating_sum += rating(&map, x,y, b'1');
             }
         }
     }
-    println!("{sum}");
+    println!("{sum} {rating_sum}");
     Ok(())
 }
