@@ -20,6 +20,7 @@ fn mutate(pebbles: &mut Vec<usize>) {
 }
 
 fn pebbles_after(start: usize, count: usize) -> usize {
+    // dbg!((start,count));
     if count == 0 {
         1
     } else if start == 0 {
@@ -46,11 +47,11 @@ fn main() -> io::Result<()> {
         .filter_map(|n| n.parse::<usize>().ok())
         .collect();
     dbg!(&pebbles);
-    for _ in 0..25 {
-        mutate(&mut pebbles);
-        // dbg!(&pebbles);
-    }
-    println!("{}", pebbles.len());
+    // for _ in 0..25 {
+    //     mutate(&mut pebbles);
+    //     // dbg!(&pebbles);
+    // }
+    // println!("{}", pebbles.len());
     let mut pebble_count=0;
     for i in pebbles.iter() {
         pebble_count+=pebbles_after(*i, 75);
