@@ -1,0 +1,89 @@
+use std::io::{self, stdin, BufRead, BufReader};
+
+const SIZEX: isize = 101; // 11 101
+const SIZEY: isize = 103; // 7 103
+
+struct Robot {
+    position: (usize, usize),
+    velocity: (isize, isize),
+}
+
+const EGG_X: f64 = 50.5;
+const EGG_Y: f64 = 51.5;
+const EGGNESS: f64 = 0.2;
+const EGG_WIDTH: f64 = EGG_X;
+const EGG_HEIGHT: f64 = EGG_Y;
+
+impl Robot {
+    fn step(&mut self) {
+        let mut newpos = (
+            self.position.0 as isize + self.velocity.0,
+            self.position.1 as isize + self.velocity.1,
+        );
+        while newpos.0 < 0 {
+            newpos.0 += SIZEX;
+        }
+        while newpos.0 >= SIZEX {
+            newpos.0 -= SIZEX;
+        }
+        while newpos.1 < 0 {
+            newpos.1 += SIZEY;
+        }
+        while newpos.1 >= SIZEY {
+            newpos.1 -= SIZEY;
+        }
+        self.position = (newpos.0 as usize, newpos.1 as usize);
+    }
+
+    fn in_easter_egg(&self) -> bool {
+        let distance = (self.position.0 as f64 - EGG_X).powi(2)
+            * (1.0 + EGGNESS * (self.position.1 as f64/ EGG_HEIGHT))
+            / EGG_WIDTH.powi(2)
+            + (self.position.1 as f64 - EGG_Y).powi(2) / EGG_HEIGHT.powi(2);
+        distance < 1.1
+    }
+}
+
+fn main() -> io::Result<()> {
+    let reader = BufReader::new(stdin());
+
+    let mut count: [usize; 4] = [0, 0, 0, 0];
+    const TIME: isize = 100;
+    const SIZEX_HALF: usize = SIZEX as usize / 2;
+    const SIZEY_HALF: usize = SIZEY as usize / 2;
+
+    let mut robots: Vec<Robot> = Vec::new();
+
+    for input in reader.lines().map_while(Result::ok) {
+        if input.len() > 1 {
+            let mut elem = input.split_whitespace();
+            let pos = elem.next().unwrap();
+            let velocity = elem.next().unwrap();
+            assert!(pos.chars().next() == Some('p'));
+            assert!(pos.chars().nth(1) == Some('='));
+            let mut positer = pos[2..].split(',');
+            let (px, py): (usize, usize) = (
+                positer.next().unwrap().parse().unwrap(),
+                positer.next().unwrap().parse().unwrap(),
+            );
+            assert!(velocity.chars().next() == Some('v'));
+            assert!(velocity.chars().nth(1) == Some('='));
+            let mut veliter = velocity[2..].split(',');
+            let (vx, vy): (isize, isize) = (
+                veliter.next().unwrap().parse().unwrap(),
+                veliter.next().unwrap().parse().unwrap(),
+            );
+            robots.push(Robot {
+                position: (px, py),
+                velocity: (vx, vy),
+            });
+        }
+    }
+    for i in 0..500000 {
+        robots.iter_mut().for_each(|r| r.step());
+        if !robots.iter().any(|r| !r.in_easter_egg()) {
+            println!("{}", i + 1);
+        }
+    }
+    Ok(())
+}
