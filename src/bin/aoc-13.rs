@@ -63,19 +63,24 @@ fn main() -> io::Result<()> {
                     }
                 }
 
-                let (xd2, yd2) = (x as f64 + 10000000000000.0, y as f64  + 10000000000000.0);
+                let (xd2, yd2) = (x as f64 + 10000000000000.0, y as f64 + 10000000000000.0);
                 // dbg!((yd, adx, ady, xd, bdy, adx, ady, bdx));
                 // gaussian elimination
                 // (x,y) = (ax bx ; ay by)(a,b)
+                // subtract ay/ax times the first from the second
+                // y - ay/ax*y = by b - ay/ax*bx*b
+                // b = (y - ay/ax*y + ay/ax*bx*b)/by
                 let numb2 = (yd2 * adx - xd2 * ady) / (bdy * adx - bdx * ady);
                 // x = ax a + bx * b
                 // a = (x - bx * b)/ax
                 let numa2 = (xd2 - bdx * numb2) / adx;
                 // dbg!(numa, numb);
-                if numa2 > 0.0 && numb2>0.0 {
+                if numa2 > 0.0 && numb2 > 0.0 {
                     let numa = numa2.round() as usize;
                     let numb = numb2.round() as usize;
-                    if x+10000000000000 == numa * a.0 + numb * b.0 && y+10000000000000 == numa * a.1 + numb * b.1 {
+                    if x + 10000000000000 == numa * a.0 + numb * b.0
+                        && y + 10000000000000 == numa * a.1 + numb * b.1
+                    {
                         count2 += numa * 3 + numb;
                     }
                 }
