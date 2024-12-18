@@ -1,4 +1,9 @@
-use std::io::{self, stdin, BufRead, BufReader};
+use core::str;
+use std::{
+    array,
+    ffi::OsString,
+    io::{self, stdin, BufRead, BufReader, Write},
+};
 
 const SIZEX: isize = 101; // 11 101
 const SIZEY: isize = 103; // 7 103
@@ -8,11 +13,11 @@ struct Robot {
     velocity: (isize, isize),
 }
 
-const EGG_X: f64 = 50.5;
-const EGG_Y: f64 = 51.5;
-const EGGNESS: f64 = 0.2;
-const EGG_WIDTH: f64 = EGG_X;
-const EGG_HEIGHT: f64 = EGG_Y;
+// const EGG_X: f64 = 50.0;
+// const EGG_Y: f64 = 51.0;
+// const EGGNESS: f64 = 0.3;
+// const EGG_WIDTH: f64 = EGG_X;
+// const EGG_HEIGHT: f64 = EGG_Y;
 
 impl Robot {
     fn step(&mut self) {
@@ -35,22 +40,27 @@ impl Robot {
         self.position = (newpos.0 as usize, newpos.1 as usize);
     }
 
-    fn in_easter_egg(&self) -> bool {
-        let distance = (self.position.0 as f64 - EGG_X).powi(2)
-            * (1.0 + EGGNESS * (self.position.1 as f64/ EGG_HEIGHT))
-            / EGG_WIDTH.powi(2)
-            + (self.position.1 as f64 - EGG_Y).powi(2) / EGG_HEIGHT.powi(2);
-        distance < 1.1
+    // fn in_easter_egg(&self) -> bool {
+    //     let distance = (self.position.0 as f64 - EGG_X).powi(2)
+    //         * (1.0 - EGGNESS * ((self.position.1 as f64 - EGG_HEIGHT) / EGG_HEIGHT))
+    //         / EGG_WIDTH.powi(2)
+    //         + (self.position.1 as f64 - EGG_Y).powi(2) / EGG_HEIGHT.powi(2);
+    //     distance < 1.1
+    // }
+
+    fn in_tree(&self) -> bool {
+        let x_diff = self.position.0.abs_diff(50);
+        (x_diff * SIZEY as usize) < (self.position.1 * (SIZEX / 2) as usize + 40)
     }
 }
 
 fn main() -> io::Result<()> {
     let reader = BufReader::new(stdin());
 
-    let mut count: [usize; 4] = [0, 0, 0, 0];
-    const TIME: isize = 100;
-    const SIZEX_HALF: usize = SIZEX as usize / 2;
-    const SIZEY_HALF: usize = SIZEY as usize / 2;
+    // let mut count: [usize; 4] = [0, 0, 0, 0];
+    // const TIME: isize = 100;
+    // const SIZEX_HALF: usize = SIZEX as usize / 2;
+    // const SIZEY_HALF: usize = SIZEY as usize / 2;
 
     let mut robots: Vec<Robot> = Vec::new();
 
@@ -79,10 +89,46 @@ fn main() -> io::Result<()> {
             });
         }
     }
-    for i in 0..500000 {
+    for i in 0..100_000 {
         robots.iter_mut().for_each(|r| r.step());
-        if !robots.iter().any(|r| !r.in_easter_egg()) {
-            println!("{}", i + 1);
+        let outside = robots.iter().filter(|r| !r.in_tree()).count();
+        // println!("{} {outside}", i+1);
+        if outside < 100 {
+            println!("{} {}", i + 1, outside);
+
+            let mut board: [[u8; SIZEX as usize]; SIZEY as usize] =
+                [array::from_fn(|_i| 0); SIZEY as usize];
+            robots.iter().for_each(|r| {
+                board[r.position.1][r.position.0] = if board[r.position.1][r.position.0] == 0 {
+                    255
+                } else {
+                    board[r.position.1][r.position.0] / 3 * 2
+                }
+            });
+
+            // for l in board.iter() {
+            //     println!("{}", str::from_utf8(l).unwrap());
+            // }
+
+            use std::fs::File;
+            use std::io::BufWriter;
+            use std::path::Path;
+
+            let os = OsString::from(&format!("P{}.png", i + 1));
+            let path = Path::new(&os);
+            let file = File::create(path).unwrap();
+            let ref mut w = BufWriter::new(file);
+
+            let mut encoder = png::Encoder::new(w, SIZEX as u32, SIZEY as u32);
+            encoder.set_color(png::ColorType::Grayscale);
+            encoder.set_depth(png::BitDepth::Eight);
+            let mut writer = encoder.write_header().unwrap();
+
+            let mut stream = writer.stream_writer().unwrap();
+            for l in board.iter() {
+                stream.write_all(l).unwrap();
+            }
+            stream.finish().unwrap();
         }
     }
     Ok(())
