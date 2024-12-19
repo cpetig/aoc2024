@@ -105,7 +105,11 @@ fn main() -> io::Result<()> {
         // );
     }
     // dbg!(&output);
-    let output2: Vec<u8> = output.iter().map(|n| (*n as u8) + b'0').intersperse(b',').collect();
+    let output2: Vec<u8> = output
+        .iter()
+        .map(|n| (*n as u8) + b'0')
+        .intersperse(b',')
+        .collect();
     println!("{}", &String::from_utf8(output2).unwrap());
     // println!("{count} {count2}");
     Ok(())

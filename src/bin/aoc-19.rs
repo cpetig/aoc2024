@@ -1,31 +1,39 @@
-use std::{collections::HashSet, io::{self, stdin, BufRead, BufReader}};
+use std::{
+    collections::{hash_map::Entry, HashMap},
+    io::{self, stdin, BufRead, BufReader},
+};
 
-fn possible(input: &str, towels: &Vec<String>, impossible: &mut HashSet<usize>) -> bool {
-    if input.is_empty() { return true; }
-    if impossible.contains(&input.len()) { return false;}
-    for (n, towel) in towels.iter().enumerate() {
-        if towel.len()<=input.len() {
-            if &input[..towel.len()]==towel.as_str() {
-                // println!("{} {} {} {}",input.len(), n, input, towel);
-                if possible(&input[towel.len()..], towels, impossible) {
-                    return true;
-                }
+fn possible(input: &str, towels: &Vec<String>, known: &mut HashMap<usize, usize>) -> usize {
+    if input.is_empty() {
+        return 1;
+    }
+    let k = known.entry(input.len());
+    if let Entry::Occupied(value) = k {
+        return *value.get();
+    }
+    let mut result = 0;
+    for towel in towels.iter() {
+        if towel.len() <= input.len() {
+            if &input[..towel.len()] == towel.as_str() {
+                // println!("{} {} {}", input.len(), input, towel);
+                result += possible(&input[towel.len()..], towels, known);
             }
         }
     }
-    impossible.insert(input.len());
-    false
+    known.insert(input.len(), result);
+    result
 }
 
 fn main() -> io::Result<()> {
     let reader = BufReader::new(stdin());
 
     let mut count: usize = 0;
+    let mut count2: usize = 0;
 
     let mut lines = reader.lines().map_while(Result::ok);
 
     let towelstring = lines.next().unwrap();
-    let mut towels : Vec<String> = Vec::new();
+    let mut towels: Vec<String> = Vec::new();
     for towel in towelstring.split(&[',', ' ']) {
         if !towel.is_empty() {
             towels.push(towel.into());
@@ -36,12 +44,14 @@ fn main() -> io::Result<()> {
     for input in lines {
         if !input.is_empty() {
             dbg!(&input);
-            let mut impossible: HashSet<usize> = HashSet::new();
-            if possible(&input, &towels, &mut impossible) {
-                count+=1;
+            let mut known: HashMap<usize, usize> = HashMap::new();
+            let possibilities = possible(&input, &towels, &mut known);
+            if possibilities > 0 {
+                count += 1;
             }
+            count2 += possibilities;
         }
     }
-    println!("{count}");
+    println!("{count} {count2}");
     Ok(())
 }
