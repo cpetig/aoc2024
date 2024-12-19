@@ -1,17 +1,19 @@
-use std::io::{self, stdin, BufRead, BufReader};
+use std::{collections::HashSet, io::{self, stdin, BufRead, BufReader}};
 
-fn possible(input: &str, towels: &Vec<String>) -> bool {
+fn possible(input: &str, towels: &Vec<String>, impossible: &mut HashSet<usize>) -> bool {
     if input.is_empty() { return true; }
+    if impossible.contains(&input.len()) { return false;}
     for (n, towel) in towels.iter().enumerate() {
         if towel.len()<=input.len() {
             if &input[..towel.len()]==towel.as_str() {
-                println!("{} {} {} {}",input.len(), n, input, towel);
-                if possible(&input[towel.len()..], towels) {
+                // println!("{} {} {} {}",input.len(), n, input, towel);
+                if possible(&input[towel.len()..], towels, impossible) {
                     return true;
                 }
             }
         }
     }
+    impossible.insert(input.len());
     false
 }
 
@@ -34,7 +36,8 @@ fn main() -> io::Result<()> {
     for input in lines {
         if !input.is_empty() {
             dbg!(&input);
-            if possible(&input, &towels) {
+            let mut impossible: HashSet<usize> = HashSet::new();
+            if possible(&input, &towels, &mut impossible) {
                 count+=1;
             }
         }
